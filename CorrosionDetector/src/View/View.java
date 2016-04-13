@@ -7,9 +7,11 @@ import java.io.File;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 import Controller.Controller;
 import Model.Model;
@@ -18,7 +20,9 @@ public class View extends JFrame {
 	Model model = new Model();
 	private Controller controller = new Controller();
 	private String currentFilePath;
-
+	JTextField databaseLocation;
+	javax.swing.JLabel databaseLabel;
+	String state;
 	public View()
 	{
 		initialize();
@@ -26,14 +30,21 @@ public class View extends JFrame {
 	
 	private void initialize()
 	{ 
+		
+		databaseLocation = new JTextField();
+		databaseLabel = new javax.swing.JLabel();
+		state = "contour";
+	
 		model = new Model();
 		myLabel = new javax.swing.JLabel();
         loadData = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         picLabel = new JLabel();
-        detectCorrosionButton = new javax.swing.JButton();
+        detectCorrosionBlackandWhiteButton = new javax.swing.JButton();
+        detectCorrosionColourButton = new javax.swing.JButton();
         
-        //bufferd image
+        
+        //buffered image
         String defaultImagePath = "src/default.jpg";
         setCurrentFilePath(defaultImagePath);
         myImage = new BufferedImage(1, 1, 1);
@@ -64,7 +75,11 @@ public class View extends JFrame {
         
         
         
-        
+        databaseLabel.setText("Data Saved - IMPLEMENT THIS LATER:");
+        databaseLocation.setText("C:\\");
+        databaseLocation.setColumns(1);
+        model.setDataBaseLocation(databaseLocation.getText());
+ 
         
         
         
@@ -79,7 +94,7 @@ public class View extends JFrame {
 
         myLabel.setText("Ok, the text is currently not loaded...");
 
-        loadData.setText("Load Data");
+        loadData.setText("Load Image File");
         loadData.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 loadDataMouseClicked(evt);
@@ -87,13 +102,22 @@ public class View extends JFrame {
         });
 
      
-        detectCorrosionButton.setText("Convert to Grey Scale");
-        detectCorrosionButton.addMouseListener(new java.awt.event.MouseAdapter() {
+        detectCorrosionBlackandWhiteButton.setText("Convert to Grey Scale");
+        detectCorrosionBlackandWhiteButton.addMouseListener(new java.awt.event.MouseAdapter()
+        {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 GreyScaleMouseClicked(evt);
             }
         });
 
+        detectCorrosionColourButton.setText("Colour Detection");
+        detectCorrosionColourButton.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ColourMouseClicked(evt);
+            }
+        });
+        
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -103,7 +127,10 @@ public class View extends JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        		
                             .addComponent(myLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                            .addComponent(databaseLabel)
+                            .addComponent(databaseLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                             .addComponent(jScrollPane1))
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -112,7 +139,8 @@ public class View extends JFrame {
                         .addGap(158, 158, 158))))
             .addGroup(layout.createSequentialGroup()
                 .addGap(154, 154, 154)
-                .addComponent(detectCorrosionButton)
+                .addComponent(detectCorrosionBlackandWhiteButton)
+                .addComponent(detectCorrosionColourButton)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -120,12 +148,15 @@ public class View extends JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(myLabel)
+                .addComponent(databaseLabel)
+                .addComponent(databaseLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 10, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(loadData)
                 .addGap(39, 39, 39)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(detectCorrosionButton)
+                .addComponent(detectCorrosionBlackandWhiteButton)
+                .addComponent(detectCorrosionColourButton)
                 .addContainerGap(82, Short.MAX_VALUE))
         );
 
@@ -156,6 +187,7 @@ public class View extends JFrame {
             			picLabel.setVisible(false);
             			picLabel.setIcon(myPic);
             			picLabel.setVisible(true);
+            			state = "contour";
             			
             			
             			
@@ -173,7 +205,70 @@ public class View extends JFrame {
 		System.out.println(getCurrentFilePath());
 		model.ChangeToGreyScale(getCurrentFilePath());
      
-    }          
+    }       
+    
+    private void ColourMouseClicked(java.awt.event.MouseEvent evt) {                                       
+        // TODO add your handling code here:
+    	
+    	
+        if (state == "contour"){
+        System.out.println("DO THE CONTOUR THING");
+        Image imageToEdit = myPic.getImage();
+		System.out.println(getCurrentFilePath());
+		model.detectRed(getCurrentFilePath());
+		//set image to contour colour
+		try{
+			
+		Image contouredImage = ImageIO.read(new File(model.sendCutString(currentFilePath)+"/contouredColour.jpg"));
+		//System.out.println(getCurrentFilePath()+"/contouredColour.jpg");
+		myPic.setImage(contouredImage);
+		picLabel.setVisible(false);
+		picLabel.setIcon(myPic);
+		picLabel.setVisible(true);
+		setState("contrast");
+		
+		}catch(Exception e)
+		{
+			//caught
+		
+			System .out.println("CAUGHT tried to print from");
+			System.out.println(model.sendCutString(currentFilePath)+"/contouredColour.jpg");
+			
+		}
+        }
+		
+        //CONTRAST
+        else 
+		{
+			//do this
+			System.out.println("DO THE CONTRAST THING");
+			Image imageToEdit = myPic.getImage();
+			System.out.println(getCurrentFilePath());
+			model.detectRed(getCurrentFilePath());
+			//set image to contour colour
+			try{
+				
+			Image contouredImage = ImageIO.read(new File(model.sendCutString(currentFilePath)+"/detectedColour.jpg"));
+			//System.out.println(getCurrentFilePath()+"/contouredColour.jpg");
+			myPic.setImage(contouredImage);
+			picLabel.setVisible(false);
+			picLabel.setIcon(myPic);
+			picLabel.setVisible(true);
+			setState("contour");
+			
+			}catch(Exception e)
+			{
+				//caught
+			
+				System .out.println("CAUGHT tried to print from");
+				System.out.println(model.sendCutString(currentFilePath)+"/detectedColour.jpg");
+				
+			}
+	        }
+	
+    } 
+    
+    
     private String getCurrentFilePath()
     {
     	return this.currentFilePath;
@@ -220,11 +315,18 @@ public class View extends JFrame {
         });
     }
 
-    // Variables declaration - do not modify                     
+  
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	// Variables declaration - do not modify                     
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton loadData;
     public javax.swing.JLabel myLabel;
-    private javax.swing.JButton detectCorrosionButton;
+    private javax.swing.JButton detectCorrosionBlackandWhiteButton;
+    private javax.swing.JButton detectCorrosionColourButton;
     private JLabel picLabel;
     private ImageIcon myPic;
     private BufferedImage myImage;

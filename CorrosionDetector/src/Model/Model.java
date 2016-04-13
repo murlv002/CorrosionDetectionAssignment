@@ -23,6 +23,7 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
@@ -39,9 +40,16 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.*;
 
 
 
-
-
 public class Model {
+	
+	private String dataBaseLocation = "C:\\";
+	String str;
+	String savePrefix;
+	
+	public void setDataBaseLocation(String s)
+	{
+		this.dataBaseLocation = s;
+	}
 	
 	   public String getData() throws FileNotFoundException, IOException {
 	        
@@ -87,11 +95,11 @@ public class Model {
 	     
 	     
 	     //RED DETECTION
-	     detectRed("colour-pic-swatch_2883168b.jpg");
+	//     detectRed("colour-pic-swatch_2883168b.jpg");
 	     
 	     
 	     //GREY SCALE WORKS!!
-	     /*
+	     
 	 
 	     
 	    
@@ -117,41 +125,132 @@ public class Model {
 	         BufferedImage image1 = new BufferedImage(mat1.cols(),mat1.rows(), BufferedImage.TYPE_BYTE_GRAY);
 	         image1.getRaster().setDataElements(0, 0, mat1.cols(), mat1.rows(), data1);
 	     	System.out.println("4");
-	         File ouptut = new File("grayscale.jpg");
+	         File ouptut = new File((imagePathToEdit + " grayscale.jpg"));
 	         ImageIO.write(image1, "jpg", ouptut);
 	     	System.out.println("5");
 	         
 		} catch (Exception e) {
 			System.out.println("ERROR WITH CORROSION DETECT");
 		}	
-       */
+       
 	}
+	    
+	    
+	    public void cutString(String imagePathToEdit)
+	    {
+	    	str=imagePathToEdit;
+	    	  
+	    	  if(str.lastIndexOf('\\') > str.lastIndexOf('/'))
+	    	  {
+	    		  
+	    	  
+	    	    int index=str.lastIndexOf('\\');
+	    	    int dotIndex = str.lastIndexOf('.');
+	    	    System.out.println(str.substring(index+1, dotIndex));
+	    	    savePrefix = (str.substring(index+1, dotIndex));
+	    	  }
+	    	  else
+	    	  {
+	    		  int index=str.lastIndexOf('/');
+		    	    int dotIndex = str.lastIndexOf('.');
+		    	    System.out.println(str.substring(index+1, dotIndex));
+		    	    savePrefix = (str.substring(index+1, dotIndex));
+	    	  }
+	    }
+	    public String sendCutString(String imagePathToEdit)
+	    {
+	    	str=imagePathToEdit;
+	    	  
+	    	  if(str.lastIndexOf('\\') > str.lastIndexOf('/'))
+	    	  {
+	    		  
+	    	  
+	    	    int index=str.lastIndexOf('\\');
+	    	    int dotIndex = str.lastIndexOf('.');
+	    	    System.out.println("index backslash was last" + str.substring(index+1, dotIndex));
+	    	    savePrefix = (str.substring(index+1, dotIndex));
+	    	  }
+	    	  else
+	    	  {
+	    		    int index=str.lastIndexOf('/');
+		    	    int dotIndex = str.lastIndexOf('.');
+		    	    System.out.println("index forward-lash was last" + str.substring(index+1, dotIndex));
+		    	    savePrefix = (str.substring(index+1, dotIndex));
+	    	  }
+	    	  return savePrefix;
+	    }
 	    
 	    public void detectRed(String imagePathToEdit)
 	    {
+	    	cutString(imagePathToEdit);
+	    	//gets substring for naming of files
+	    	 
+	    		  
+	    	  //check to see if directory exists:
+	    	  File PictureDirectory = new File(savePrefix);
+	    	  if (!PictureDirectory.exists()) {
+	    		  boolean directoryExists = false;
+	    		
+	    		  try{
+	    			  PictureDirectory.mkdir();
+	    			  directoryExists = true;
+	    		  }
+	    		  catch(SecurityException se){
+	    		        //handle it
+	    		    }        
+	    	  }
+	    	  
+	    	  
+	    	  
+	    	  
 	    	 //color range of red like color
-	        CvScalar min = opencv_core.cvScalar(0, 0, 130, 0);//BGR-A
-	        CvScalar max= opencv_core.cvScalar(140, 110, 255, 0);//BGR-A
+	       // CvScalar min = opencv_core.cvScalar(0, 0, 130, 255);//BGR-A
+	       // CvScalar max= opencv_core.cvScalar(140, 110, 255, 255);//BGR-A
+	        //range other
+	  
+	        CvScalar min = opencv_core.cvScalar(55, 79, 102, 255);//BGR-A
+	        CvScalar max= opencv_core.cvScalar(96, 127, 188, 255);//BGR-A
+	        
 	        System.out.println(imagePathToEdit);
-	        System.out.println(imagePathToEdit);
-	        System.out.println(imagePathToEdit);
-	        System.out.println(imagePathToEdit);
+	   
+
 	            //read image
 	            IplImage orgImg = cvLoadImage(imagePathToEdit);
-	          
-	       
 	        
 	            //create binary image of original size
-	            IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), 8, 1);
+	         
+	            IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), orgImg.depth(), 1);
 	            
+	      
 	            //apply thresholding
 	            cvInRangeS(orgImg, min, max, imgThreshold);
+	 
 	            //smooth filter- median
 	            cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 13, 0, 0, 0);
-	            //save
-	            cvSaveImage("threshold.jpg", imgThreshold);
-	        
 	            
+	            //save
+	            cvSaveImage(savePrefix+"/detectedColour.jpg", imgThreshold);
+	         
+	            
+	            //test contours
+	         
+	            CvMemStorage storage=CvMemStorage.create();
+	            CvSeq squares = new CvContour();
+	            cvFindContours(imgThreshold, storage, squares, Loader.sizeof(CvContour.class),    CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+	            if (squares.isNull() != true)
+	            {
+	         //   System.out.println(squares.total());
+	            	 for (int i=0; i<squares.total(); i++)
+	 	            {
+	 	                cvDrawContours(orgImg, squares, CvScalar.ONE, CvScalar.ONE, 127, 5, 8);
+	 	      
+	 	            }
+	            }
+	          //  cvSaveImage("C://coasdasdas.jpg", orgImg);
+	         //   cvSaveImage(dataBaseLocation + savePrefix+ " contouredColour.jpg", orgImg);
+	            cvSaveImage(savePrefix+ "/contouredColour.jpg", orgImg);
+	            System.out.println("saving at " + savePrefix+ "_contouredColour.jpg" );
+	      
 	    }
 	    
 	    
