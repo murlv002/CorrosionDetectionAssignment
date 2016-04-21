@@ -208,8 +208,8 @@ public class Model {
 	       // CvScalar max= opencv_core.cvScalar(140, 110, 255, 255);//BGR-A
 	        //range other
 	  
-	        CvScalar min = opencv_core.cvScalar(55, 79, 102, 255);//BGR-A
-	        CvScalar max= opencv_core.cvScalar(96, 127, 188, 255);//BGR-A
+	        CvScalar min = opencv_core.cvScalar(55, 79, 94, 255);//BGR-A
+	        CvScalar max= opencv_core.cvScalar(96, 127, 195, 255);//BGR-A
 	        
 	        System.out.println(imagePathToEdit);
 	   
@@ -248,6 +248,13 @@ public class Model {
 	            }
 	          //  cvSaveImage("C://coasdasdas.jpg", orgImg);
 	         //   cvSaveImage(dataBaseLocation + savePrefix+ " contouredColour.jpg", orgImg);
+	            int rustCount = cvCountNonZero(imgThreshold);
+	            int totalPixels = imgThreshold.arraySize();
+	            double rustPercentage = (double)rustCount/ (double) totalPixels;
+	    
+	            System.out.println("Rust count is  " + rustCount);
+	            System.out.println("Total size is:  " + totalPixels);
+	            System.out.println("Rust percentage is    " + rustPercentage +"%");
 	            cvSaveImage(savePrefix+ "/contouredColour.jpg", orgImg);
 	            System.out.println("saving at " + savePrefix+ "_contouredColour.jpg" );
 	      
