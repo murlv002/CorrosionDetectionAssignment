@@ -45,6 +45,9 @@ public class Model {
 	private String dataBaseLocation = "C:\\";
 	String str;
 	String savePrefix;
+	double rustPercentage;
+	String databaseDirectory = "";
+	boolean directoryChosen = false;
 	
 	public void setDataBaseLocation(String s)
 	{
@@ -108,7 +111,7 @@ public class Model {
 
        	     System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         	 File input = new File(imagePathToEdit);
-    	    System.out.println(imagePathToEdit);
+    	    System.out.println("Image path to edit " + imagePathToEdit);
         	 System.out.println("1");
 			 BufferedImage image = ImageIO.read(new File(imagePathToEdit));
 				System.out.println("2");
@@ -125,9 +128,11 @@ public class Model {
 	         BufferedImage image1 = new BufferedImage(mat1.cols(),mat1.rows(), BufferedImage.TYPE_BYTE_GRAY);
 	         image1.getRaster().setDataElements(0, 0, mat1.cols(), mat1.rows(), data1);
 	     	System.out.println("4");
-	         File ouptut = new File((imagePathToEdit + " grayscale.jpg"));
-	         ImageIO.write(image1, "jpg", ouptut);
+	         File output = new File((imagePathToEdit + " grayscale.jpg"));
+	         System.out.println("output  " +   output);
+	         ImageIO.write(image1, "jpg", output);
 	     	System.out.println("5");
+	     
 	         
 		} catch (Exception e) {
 			System.out.println("ERROR WITH CORROSION DETECT");
@@ -228,8 +233,9 @@ public class Model {
 	            //smooth filter- median
 	            cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 13, 0, 0, 0);
 	            
-	            //save
-	            cvSaveImage(savePrefix+"/detectedColour.jpg", imgThreshold);
+	            //save the black and white
+	            //SHOULD ADD A FOLDER IF ONE DOES NOT EXIST!!
+	            cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_detectedColour.jpg", imgThreshold);
 	         
 	            
 	            //test contours
@@ -246,20 +252,48 @@ public class Model {
 	 	      
 	 	            }
 	            }
-	          //  cvSaveImage("C://coasdasdas.jpg", orgImg);
-	         //   cvSaveImage(dataBaseLocation + savePrefix+ " contouredColour.jpg", orgImg);
-	            int rustCount = cvCountNonZero(imgThreshold);
-	            int totalPixels = imgThreshold.arraySize();
-	            double rustPercentage = (double)rustCount/ (double) totalPixels;
+	     
 	    
-	            System.out.println("Rust count is  " + rustCount);
-	            System.out.println("Total size is:  " + totalPixels);
+	            setPercentageOfRust(imgThreshold);
+	            //save the contour image
 	            System.out.println("Rust percentage is    " + rustPercentage +"%");
-	            cvSaveImage(savePrefix+ "/contouredColour.jpg", orgImg);
-	            System.out.println("saving at " + savePrefix+ "_contouredColour.jpg" );
+	            cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_contouredColour.jpg", orgImg);
+	            //cvSaveImage("C:\\Users\\Liam\\Documents\\Software Engineering\\Ge.jpg", orgImg);
+	           // System.out.println("database location is: " + dataBaseLocation);
+	           // System.out.println("C:/Users/Liam/Documents/Software Engineering.jps");
+	            //cvSaveImage(savePrefix+ "/contouredColour.jpg", orgImg);
+	            System.out.println("saving at " +databaseDirectory+ "\\"+savePrefix+ "_contouredColour.jpg" );
+	          
 	      
 	    }
-	    
+	    public void setPercentageOfRust(IplImage imgThreshold)
+	    {
+	    	    int rustCount = cvCountNonZero(imgThreshold);
+	            int totalPixels = imgThreshold.arraySize();
+	            rustPercentage = (double)rustCount/ (double) totalPixels;
+	           
+	    	
+	    }
+
+		public double getRustPercentage() {
+			return rustPercentage;
+		}
+
+		public String getDatabaseDirectory() {
+			return databaseDirectory;
+		}
+
+		public void setDatabaseDirectory(String databaseDirectory) {
+			this.databaseDirectory = databaseDirectory;
+		}
+
+		public boolean isDirectoryChosen() {
+			return directoryChosen;
+		}
+
+		public void setDirectoryChosen(boolean directoryChosen) {
+			this.directoryChosen = directoryChosen;
+		}
 	    
 	    
 	    

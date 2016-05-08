@@ -1,6 +1,8 @@
 package View;
 
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -15,32 +17,50 @@ import javax.swing.JTextField;
 
 import Controller.Controller;
 import Model.Model;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.GroupLayout;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class View extends JFrame {
 	Model model = new Model();
 	private Controller controller = new Controller();
 	private String currentFilePath;
-	JTextField databaseLocation;
+	JLabel databaseLocation;
 	javax.swing.JLabel databaseLabel;
 	String state;
+	javax.swing.JLabel percentageRustLabel;
+	boolean directoryChosen = false;
+	String directoryChosenString = "";
 	public View()
 	{
+		
+	  
 		initialize();
 	}
 	
 	private void initialize()
 	{ 
 		
-		databaseLocation = new JTextField();
+		databaseLocation = new JLabel();
 		databaseLabel = new javax.swing.JLabel();
 		state = "contour";
-	
+		percentageRustLabel = new JLabel();
 		model = new Model();
 		myLabel = new javax.swing.JLabel();
         loadData = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         picLabel = new JLabel();
         detectCorrosionBlackandWhiteButton = new javax.swing.JButton();
+        detectCorrosionBlackandWhiteButton.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        	}
+        });
         detectCorrosionColourButton = new javax.swing.JButton();
         
         
@@ -69,6 +89,7 @@ public class View extends JFrame {
         
         picLabel.setIcon(myPic);
         picLabel.setSize(20, 20);
+        
 
        
         jScrollPane1.setViewportView(picLabel);
@@ -76,10 +97,25 @@ public class View extends JFrame {
         
         
         databaseLabel.setText("Data Saved - IMPLEMENT THIS LATER:");
-        databaseLocation.setText("C:\\");
-        databaseLocation.setColumns(1);
+        //try to find the document, if it is real then yay, if not then no!
+        
+        //keep
+        final JFileChooser temp = new JFileChooser();
+        databaseLocation.setText(temp.getFileSystemView().getDefaultDirectory().toString());
+        System.out.println("Default directory is : " + temp.getFileSystemView().getDefaultDirectory().toString());
         model.setDataBaseLocation(databaseLocation.getText());
- 
+       //
+        
+		directoryChosenString = databaseLocation.getText();
+		//escape backslashes
+	//	directoryChosenString.replace("\\","\\\\");
+					
+		model.setDatabaseDirectory(directoryChosenString);
+		directoryChosen = true;
+		model.setDirectoryChosen(directoryChosen);
+		//set the database label to the directory.
+		
+		databaseLocation.setText(directoryChosenString);
         
         
         
@@ -118,50 +154,126 @@ public class View extends JFrame {
             }
         });
         
+        
+        
+        
+        
+        
+        
+        JLabel rustDefinition = new JLabel("New label");
+        
+        JLabel officialRustPercentageLabel = new JLabel("New label");
+        
+        JLabel lblNewLabel = new JLabel("New label");
+        
+        JButton btnSelectDatabaseFolder = new JButton("Select Database Folder");
+        btnSelectDatabaseFolder.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+            	loadDirectoryMouseClicked(evt);
+            }
+        });
+        
+        
+        
+        
+        
+        
+        
+        
+        
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        		
-                            .addComponent(myLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
-                            .addComponent(databaseLabel)
-                            .addComponent(databaseLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1))
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(loadData)
-                        .addGap(158, 158, 158))))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(154, 154, 154)
-                .addComponent(detectCorrosionBlackandWhiteButton)
-                .addComponent(detectCorrosionColourButton)
-                .addGap(0, 0, Short.MAX_VALUE))
+        	layout.createParallelGroup(Alignment.LEADING)
+        		.addGroup(layout.createSequentialGroup()
+        			.addContainerGap()
+        			.addGroup(layout.createParallelGroup(Alignment.TRAILING)
+        				.addGroup(layout.createSequentialGroup()
+        					.addComponent(databaseLocation, GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
+        					.addGap(34)
+        					.addComponent(btnSelectDatabaseFolder)
+        					.addGap(131))
+        				.addGroup(Alignment.LEADING, layout.createSequentialGroup()
+        					.addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 595, Short.MAX_VALUE)
+        					.addContainerGap())
+        				.addGroup(Alignment.LEADING, layout.createSequentialGroup()
+        					.addGroup(layout.createParallelGroup(Alignment.LEADING)
+        						.addComponent(myLabel, GroupLayout.DEFAULT_SIZE, 605, Short.MAX_VALUE)
+        						.addComponent(databaseLabel))
+        					.addGap(0))
+        				.addComponent(lblNewLabel, Alignment.LEADING)
+        				.addGroup(Alignment.LEADING, layout.createSequentialGroup()
+        					.addComponent(rustDefinition)
+        					.addPreferredGap(ComponentPlacement.UNRELATED)
+        					.addComponent(officialRustPercentageLabel))
+        				.addGroup(Alignment.LEADING, layout.createSequentialGroup()
+        					.addComponent(loadData, GroupLayout.PREFERRED_SIZE, 118, GroupLayout.PREFERRED_SIZE)
+        					.addPreferredGap(ComponentPlacement.UNRELATED)
+        					.addComponent(detectCorrosionColourButton)
+        					.addPreferredGap(ComponentPlacement.UNRELATED)
+        					.addComponent(detectCorrosionBlackandWhiteButton)
+        					.addPreferredGap(ComponentPlacement.UNRELATED)
+        					.addComponent(percentageRustLabel, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
+        					.addContainerGap())))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(myLabel)
-                .addComponent(databaseLabel)
-                .addComponent(databaseLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 10, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(loadData)
-                .addGap(39, 39, 39)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(detectCorrosionBlackandWhiteButton)
-                .addComponent(detectCorrosionColourButton)
-                .addContainerGap(82, Short.MAX_VALUE))
+        	layout.createParallelGroup(Alignment.LEADING)
+        		.addGroup(layout.createSequentialGroup()
+        			.addContainerGap()
+        			.addComponent(myLabel)
+        			.addComponent(databaseLabel)
+        			.addPreferredGap(ComponentPlacement.UNRELATED)
+        			.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+        				.addComponent(databaseLocation, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
+        				.addComponent(btnSelectDatabaseFolder, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+        			.addPreferredGap(ComponentPlacement.UNRELATED)
+        			.addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
+        			.addPreferredGap(ComponentPlacement.UNRELATED)
+        			.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
+        				.addComponent(percentageRustLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        				.addComponent(loadData, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        				.addComponent(detectCorrosionColourButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        				.addComponent(detectCorrosionBlackandWhiteButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        			.addGap(18)
+        			.addGroup(layout.createParallelGroup(Alignment.BASELINE)
+        				.addComponent(rustDefinition)
+        				.addComponent(officialRustPercentageLabel))
+        			.addPreferredGap(ComponentPlacement.UNRELATED)
+        			.addComponent(lblNewLabel)
+        			.addContainerGap())
         );
-
-        pack();
-    }// </editor-fold>                        
+        getContentPane().setLayout(layout);
+        
+     //   Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      
+        this.setSize(631, 599);
+    }// </editor-fold>         
+	
+	
+	
+	
+	private void loadDirectoryMouseClicked(java.awt.event.MouseEvent evt)
+	{
+		  try {
+    		final JFileChooser fc = new JFileChooser();
+    		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    		int response = fc.showOpenDialog(this);
+    		if (response == JFileChooser.APPROVE_OPTION){
+    			System.out.println("CHANGE MY DIRECTORY TO THIS: " + fc.getSelectedFile());
+    			directoryChosenString = fc.getSelectedFile().toString();
+    			//escape backslashes
+    			directoryChosenString.replace("\\","\\\\");
+	    					
+    			model.setDatabaseDirectory(directoryChosenString);
+    			directoryChosen = true;
+    			model.setDirectoryChosen(directoryChosen);
+    			//set the database label to the directory.
+    			
+    			databaseLocation.setText(directoryChosenString);}
+		  } catch (Exception er) {
+	            System.out.println("Some has gone wrong with the loadDataMouseClick");
+		  }
+	}
 
     private void loadDataMouseClicked(java.awt.event.MouseEvent evt) {                                      
         // TODO add your handling code here:
@@ -175,28 +287,48 @@ public class View extends JFrame {
             if (flag == true)
             	{
             		final JFileChooser fc = new JFileChooser();
+            		FileNameExtensionFilter filter = new FileNameExtensionFilter(
+            		        "JPG & GIF Images", "jpg", "gif");
+            		    fc.setFileFilter(filter);
+
             		int response = fc.showOpenDialog(this);
             		if (response == JFileChooser.APPROVE_OPTION){
+            		
             			File newFile = fc.getSelectedFile();
             			//open the file here and update the picture!
             			myLabel.setText(newFile.getName());
             			System.out.println(newFile.toString());
             			myImage= ImageIO.read(new File(newFile.toString()));
             			setCurrentFilePath(newFile.toString());
-            			myPic.setImage(myImage);
-            			picLabel.setVisible(false);
+            			
+            			//myPic.setImage(myImage);
+            			//SCALE THE PIC BUT IT SHOULD NOT GO BIGGER THAN THE HEIGHT/WIDTH.
+            			picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
+            			//reduce size of image
+            			myPic.setImage(myImage.getScaledInstance(picLabel.getWidth(), picLabel.getHeight(), Image.SCALE_SMOOTH));
+            			
+            			
+            		//	picLabel.setVisible(false);
             			picLabel.setIcon(myPic);
+            			
             			picLabel.setVisible(true);
             			state = "contour";
+            			percentageRustLabel.setVisible(false);
+            		  //  this.pack();
+            	
+            			//IF STATEMENT: IF WINDOW IS TOO SMALL, MAKE IT BIGGER
+            			//IF PICLABEL IS BIGGER THAN JSCROLLPANE1 MAKE THIS.SETSIZE BIGGER
+            			//jScrollPane1.setSize(myImage.getWidth(), myImage.getHeight());
+            		//	this.setSize(myImage.getWidth(), myImage.getHeight());
             			
-            			
-            			
+            		//	this.pack();
             		}
             		
             	}
         } catch (Exception er) {
             System.out.println("Some has gone wrong with the loadDataMouseClick");
         }
+        
     }                                     
 
     private void GreyScaleMouseClicked(java.awt.event.MouseEvent evt) {                                       
@@ -214,24 +346,40 @@ public class View extends JFrame {
         if (state == "contour"){
         System.out.println("DO THE CONTOUR THING");
         Image imageToEdit = myPic.getImage();
-		System.out.println(getCurrentFilePath());
+		System.out.println("my current file path is: " + getCurrentFilePath());
 		model.detectRed(getCurrentFilePath());
 		//set image to contour colour
 		try{
 			
-		Image contouredImage = ImageIO.read(new File(model.sendCutString(currentFilePath)+"/contouredColour.jpg"));
+	//TODO
+	//IF FILE HAS BEEN DRAWN, THEN JUST READ!
+		System.out.println("Trying to Read File Path: " + directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_contouredColour.jpg");
+		Image contouredImage = ImageIO.read(new File(directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_contouredColour.jpg"));
 		//System.out.println(getCurrentFilePath()+"/contouredColour.jpg");
-		myPic.setImage(contouredImage);
+	//	myPic.setImage(contouredImage);
+		System.out.println("did i make it");
 		picLabel.setVisible(false);
+		picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
+		myPic.setImage(contouredImage.getScaledInstance(picLabel.getWidth(), picLabel.getHeight(), Image.SCALE_SMOOTH));
+		
 		picLabel.setIcon(myPic);
 		picLabel.setVisible(true);
 		setState("contrast");
+		//set the piclabel size
+		
+		//reduce size of image
+		
+		
+		percentageRustLabel.setText(Double.toString((model.getRustPercentage())));
+		percentageRustLabel.setVisible(true);
+	   // pack();
+
 		
 		}catch(Exception e)
 		{
 			//caught
 		
-			System .out.println("CAUGHT tried to print from");
+			System .out.println("CAUGHT tried to CONTOUR from : " + e.toString());
 			System.out.println(model.sendCutString(currentFilePath)+"/contouredColour.jpg");
 			
 		}
@@ -248,24 +396,27 @@ public class View extends JFrame {
 			//set image to contour colour
 			try{
 				
-			Image contouredImage = ImageIO.read(new File(model.sendCutString(currentFilePath)+"/detectedColour.jpg"));
+			Image contouredImage = ImageIO.read(new File(directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_detectedColour.jpg"));
 			//System.out.println(getCurrentFilePath()+"/contouredColour.jpg");
-			myPic.setImage(contouredImage);
+	//		myPic.setImage(contouredImage);
+			picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
+			myPic.setImage(contouredImage.getScaledInstance(picLabel.getWidth(), picLabel.getHeight(), Image.SCALE_SMOOTH));
 			picLabel.setVisible(false);
 			picLabel.setIcon(myPic);
 			picLabel.setVisible(true);
 			setState("contour");
+			 
 			
 			}catch(Exception e)
 			{
 				//caught
 			
-				System .out.println("CAUGHT tried to print from");
+				System .out.println("CAUGHT tried to CONTRAST exception: " + e.toString());
 				System.out.println(model.sendCutString(currentFilePath)+"/detectedColour.jpg");
 				
 			}
 	        }
-	
+    //    pack();
     } 
     
     
@@ -312,6 +463,7 @@ public class View extends JFrame {
             public void run() {
                 new View().setVisible(true);
             }
+       
         });
     }
 
@@ -330,10 +482,4 @@ public class View extends JFrame {
     private JLabel picLabel;
     private ImageIcon myPic;
     private BufferedImage myImage;
-
-    // End of variables declaration                   
-
-	
-	
-	
 }
