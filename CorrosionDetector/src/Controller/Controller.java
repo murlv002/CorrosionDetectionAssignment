@@ -21,7 +21,7 @@ public class Controller {
             Model model = new Model();
             return model.getData();
         } catch (Exception er) {
-            return "There was an error.";
+            return "No Image File Loaded";
         }
     }
     /*

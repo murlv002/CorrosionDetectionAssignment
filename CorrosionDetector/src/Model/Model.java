@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.awt.image.DataBufferByte;
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -48,6 +50,11 @@ public class Model {
 	double rustPercentage;
 	String databaseDirectory = "";
 	boolean directoryChosen = false;
+	double deepRustPercentage;
+	String rustStatus;
+	
+	
+	
 	
 	public void setDataBaseLocation(String s)
 	{
@@ -86,13 +93,17 @@ public class Model {
 	            // Since there was an error, you probably want to notify the user
 	            // For that error. So return the error.
 	            data = er.getMessage();
+	        
 	        }
 	        // Return the string read from the file
 	        return data;
 	    }
 	    
+	   
 	    public void ChangeToGreyScale(String imagePathToEdit)
 	    {
+	    	
+	    	/*
 	     //OPENCV STUFF
 	     System.out.println("hello");
 	     
@@ -137,7 +148,7 @@ public class Model {
 		} catch (Exception e) {
 			System.out.println("ERROR WITH CORROSION DETECT");
 		}	
-       
+       */
 	}
 	    
 	    
@@ -204,24 +215,20 @@ public class Model {
 	    		        //handle it
 	    		    }        
 	    	  }
-	    	  
-	    	  
-	    	  
-	    	  
-	    	 //color range of red like color
-	       // CvScalar min = opencv_core.cvScalar(0, 0, 130, 255);//BGR-A
-	       // CvScalar max= opencv_core.cvScalar(140, 110, 255, 255);//BGR-A
 	        //range other
-	  
-	        CvScalar min = opencv_core.cvScalar(55, 79, 94, 255);//BGR-A
-	        CvScalar max= opencv_core.cvScalar(96, 127, 195, 255);//BGR-A
+
+		     //orig   
+		        CvScalar min = opencv_core.cvScalar(31, 72, 94, 255);//BGR-A
+		        CvScalar max= opencv_core.cvScalar(110, 149, 226, 255);//BGR-A
+		        
+	     //   CvScalar min = opencv_core.cvScalar(50, 70, 94, 255);//BGR-A
+	      //  CvScalar max= opencv_core.cvScalar(110, 145, 226, 255);//BGR-A
 	        
 	        System.out.println(imagePathToEdit);
-	   
 
 	            //read image
 	            IplImage orgImg = cvLoadImage(imagePathToEdit);
-	        
+	            IplImage deepImg = orgImg;
 	            //create binary image of original size
 	         
 	            IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), orgImg.depth(), 1);
@@ -233,8 +240,8 @@ public class Model {
 	            //smooth filter- median
 	            cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 13, 0, 0, 0);
 	            
-	            //save the black and white
-	            //SHOULD ADD A FOLDER IF ONE DOES NOT EXIST!!
+	            //SAVE BLACK AND WHITE SURFACE RUST _detectedColour.jpg
+	          
 	            cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_detectedColour.jpg", imgThreshold);
 	         
 	            
@@ -248,13 +255,15 @@ public class Model {
 	         //   System.out.println(squares.total());
 	            	 for (int i=0; i<squares.total(); i++)
 	 	            {
-	 	                cvDrawContours(orgImg, squares, CvScalar.ONE, CvScalar.ONE, 127, 5, 8);
+	 	                cvDrawContours(orgImg, squares, CvScalar.ONE, CvScalar.ONE, 127, 2, 1);
 	 	      
 	 	            }
 	            }
 	     
+	        
+	            
 	    
-	            setPercentageOfRust(imgThreshold);
+	            setPercentageOfRust(imgThreshold, "allRust");
 	            //save the contour image
 	            System.out.println("Rust percentage is    " + rustPercentage +"%");
 	            cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_contouredColour.jpg", orgImg);
@@ -262,17 +271,142 @@ public class Model {
 	           // System.out.println("database location is: " + dataBaseLocation);
 	           // System.out.println("C:/Users/Liam/Documents/Software Engineering.jps");
 	            //cvSaveImage(savePrefix+ "/contouredColour.jpg", orgImg);
+	          //SAVE CONTOUR SURFACE RUST _contouredColour.jpg
 	            System.out.println("saving at " +databaseDirectory+ "\\"+savePrefix+ "_contouredColour.jpg" );
 	          
+	            
+	            
+	            //get new image
+	            IplImage imgDeepThreshold = cvCreateImage(cvGetSize(orgImg), orgImg.depth(), 1);
+	            IplImage imgDeepThreshold2 = cvCreateImage(cvGetSize(orgImg), orgImg.depth(), 1);
+	            IplImage imgDeepThreshold3 = cvCreateImage(cvGetSize(orgImg), orgImg.depth(), 1);
+	            //orig 
+	            //Set new min max to reflect heavy rust
+	         //   min = opencv_core.cvScalar(50, 70, 105, 255);//BGR-A
+		    //    max= opencv_core.cvScalar(102, 119, 151, 255);//BGR-A
+		       //altered
+	           // min = opencv_core.cvScalar(45, 43, 82, 255);//BGR-A
+		      //  max= opencv_core.cvScalar(102, 119, 151, 255);//BGR-A
+	            
+	            
+	            //overall min
+		        //min = opencv_core.cvScalar(15, 37, 41, 255);//BGR-A
+		        //max= opencv_core.cvScalar(41, 70, 41, 255);//BGR-A
+		        
+		        //overall max
+		        //CvScalar min2 = opencv_core.cvScalar(71, 92, 73, 255);//BGR-A
+		        //CvScalar max2 = opencv_core.cvScalar(102, 119, 151, 255);//BGR-A
+		        
+		        
+		        //overall min
+		        min = opencv_core.cvScalar(48, 58, 90, 255);//BGR-A
+		        max= opencv_core.cvScalar(70, 80, 165, 255);//BGR-A
+		        
+		        //overall max
+		        CvScalar min2 = opencv_core.cvScalar(80, 90, 105, 255);//BGR-A
+		        CvScalar max2 = opencv_core.cvScalar(120, 128, 160, 255);//BGR-A
+		  
+		        
+	            //run a the image against new parameters.
+		        cvSmooth(imgDeepThreshold, imgDeepThreshold, CV_MEDIAN, 13, 0, 0, 0);
+		        cvInRangeS(deepImg, min, max, imgDeepThreshold3);
+		        cvInRangeS(deepImg, min2, max2, imgDeepThreshold2);
+		        cvAdd(imgDeepThreshold2, imgDeepThreshold3, imgDeepThreshold);
+		        setPercentageOfRust(imgDeepThreshold, "deepRust");
+		        
+		        //SAVE CONTOUR HARD RUST _detectedHardRustColour.jpg
+		        cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_detectedHardRustColour.jpg", imgDeepThreshold);
+	            //Find deep rust contours
+		    	CvMemStorage storage2=CvMemStorage.create();
+	            CvSeq squares2 = new CvContour();
+		        cvFindContours(imgDeepThreshold, storage2, squares2, Loader.sizeof(CvContour.class),    CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+		        
+	            if (squares.isNull() != true)
+	            
+	            {
+	            
+	         //   System.out.println(squares.total());
+	            	 for (int i=0; i<squares2.total(); i++)
+	 	            {
+	 	                cvDrawContours(deepImg, squares2, CvScalar.ONE, CvScalar.ONE, 127, 2, 1);
+
+	 	            }
+	            }
+	            //save the contours
+	            //SAVE CONTOUR HARD RUST _contouredHardRust.jpg
+	            cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_contouredHardRust.jpg", deepImg);
+	            
 	      
 	    }
-	    public void setPercentageOfRust(IplImage imgThreshold)
+	    public void setPercentageOfRust(IplImage imgThreshold,  String type)
 	    {
-	    	    int rustCount = cvCountNonZero(imgThreshold);
-	            int totalPixels = imgThreshold.arraySize();
+	    	System.out.println("Setting percentage");
+	    	   int rustCount = cvCountNonZero(imgThreshold);
+	           int totalPixels = imgThreshold.arraySize();
+	          
+	    	if (type == "allRust")
+	    	{
+	    	 
 	            rustPercentage = (double)rustCount/ (double) totalPixels;
-	           
-	    	
+	            
+	            System.out.println("ALL RUST IS: " + deepRustPercentage);
+	    	}
+		    if (type == "deepRust")
+		    {
+		    	deepRustPercentage = (double)rustCount/ (double) totalPixels;
+		    	System.out.println("DEEP RUST IS: " + deepRustPercentage);
+		    	 boolean checkedFlag = false;
+		    	//set rust status
+		    	//logic
+		    	//Grade B but not Heavy is less than 10%
+		    		System.out.println("CHECKED");
+		    if (checkedFlag == false)
+		    	{
+		    	
+		    	System.out.println("CHECKED");
+		             if (((rustPercentage > 0.4 && rustPercentage <= 1.0) || deepRustPercentage >= 0.1) && checkedFlag != true)
+		    	{
+		    		checkedFlag = true;
+		    		System.out.println("POOR");
+		    		rustStatus="Poor";
+		    	}
+		             //if clause due to overlap of rust colours
+		    	else if (((rustPercentage >= 0 && rustPercentage < 0.2) && checkedFlag != true ))
+		    	{
+		    		checkedFlag = true;
+		    		System.out.println("GOOD");
+		    		rustStatus="Good";
+		    	}
+		    		//Less than 20% Grade C or Grade B is greater than 20% and total rust < 40%
+		    		else if (((rustPercentage > 0.2 && rustPercentage < 0.4) ||  (deepRustPercentage < 0.1 && deepRustPercentage >= 0.01)) && checkedFlag != true)
+		    	{
+		    		checkedFlag = true;
+		    		System.out.println("FAIR");
+		    		rustStatus="Fair";
+		    	}
+		    	
+		    		else
+		    	{
+		    		checkedFlag = true;
+		    		System.out.println("no idea");
+		    		rustStatus="Visual Inspection Required";
+		    	}
+		        
+		        
+		    	}
+		    rustPercentage = round(rustPercentage, 4);
+		    deepRustPercentage = round(deepRustPercentage, 4);
+	    	}
+		    
+		    
+		    
+	    }
+	    public static double round(double value, int places) {
+	        if (places < 0) throw new IllegalArgumentException();
+
+	        BigDecimal bd = new BigDecimal(value);
+	        bd = bd.setScale(places, RoundingMode.HALF_UP);
+	        return bd.doubleValue();
 	    }
 
 		public double getRustPercentage() {
@@ -287,6 +421,10 @@ public class Model {
 			this.databaseDirectory = databaseDirectory;
 		}
 
+		public String getSavePrefix() {
+			return savePrefix;
+		}
+
 		public boolean isDirectoryChosen() {
 			return directoryChosen;
 		}
@@ -294,7 +432,22 @@ public class Model {
 		public void setDirectoryChosen(boolean directoryChosen) {
 			this.directoryChosen = directoryChosen;
 		}
-	    
+
+		public double getDeepRustPercentage() {
+			return deepRustPercentage;
+		}
+
+		public void setDeepRustPercentage(double deepRustPercentage) {
+			this.deepRustPercentage = deepRustPercentage;
+		}
+		public String getRustStatus() {
+			return rustStatus;
+		}
+
+		public void setRustStatus(String rustStatus) {
+			this.rustStatus = rustStatus;
+		}
+
 	    
 	    
 	    //OPEN CV CLEAN UP
