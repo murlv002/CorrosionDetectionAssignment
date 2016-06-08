@@ -1,5 +1,5 @@
 package View;
-
+////////////////// THIS CLASS CONTAINS ALL THINGS VIEW RELATED. ALL LOGIC IS STORED IN THE MODEL CLASS
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -8,8 +8,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -37,6 +39,7 @@ import java.awt.Color;
 import java.awt.SystemColor;
 
 public class View extends JFrame {
+	//default vars
 	Model model = new Model();
 	private Controller controller = new Controller();
 	private String currentFilePath;
@@ -49,19 +52,19 @@ public class View extends JFrame {
 	JLabel lblStatus;
 	boolean detectedThisSession;
 	private int lastCode = 0;
+	boolean isDefault = true;
 	
 	public View()
 	{
+		setMinimumSize(new Dimension(870, 660));
 		getContentPane().setBackground(Color.WHITE);
 		setTitle("Corrosion Detector\r\n");
-		
-	  
 		initialize();
 	}
 	
 	private void initialize()
 	{ 
-		
+		//default vars.
 		databaseLocation = new JLabel();
 		state = "contour";
 		percentageRustLabel = new JLabel();
@@ -83,18 +86,20 @@ public class View extends JFrame {
         detectCorrosionColourButton.setBackground(SystemColor.activeCaption);
         
         
-        //buffered image
-        String defaultImagePath = "src/default.jpg";
+        //default image set here!
+        String defaultImagePath = "default.png";
+        InputStream stream = this.getClass().getClassLoader().getResourceAsStream("default.png");
+        //URL defaultURLImagePath = getClass().getResource("default.png");
         setCurrentFilePath(defaultImagePath);
         myImage = new BufferedImage(1, 1, 1);
-        //image code
-        //default image
+  
         try {
+      
+        myImage= ImageIO.read((stream));
+   //     myImage = Toolkit.getDefaultToolkit().getImage(defaultURLImagePath);
+       
         	
         
-          
-             
-        myImage= ImageIO.read(new File(defaultImagePath));
         System.out.println(myImage.getGraphics());
 
         } catch (Exception e)
@@ -104,32 +109,22 @@ public class View extends JFrame {
         }
         
         myPic = new ImageIcon(myImage);
-     
+       // setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("src/default.png")));
         
         picLabel.setIcon(myPic);
         picLabel.setSize(20, 20);
         
-
-       
         jScrollPane1.setViewportView(picLabel);
         //try to find the document, if it is real then yay, if not then no!
-        
-        //keep
         final JFileChooser temp = new JFileChooser();
         databaseLocation.setText(temp.getFileSystemView().getDefaultDirectory().toString());
         System.out.println("Default directory is : " + temp.getFileSystemView().getDefaultDirectory().toString());
         model.setDataBaseLocation(databaseLocation.getText());
-       //
-        
 		directoryChosenString = databaseLocation.getText();
-		//escape backslashes
-	//	directoryChosenString.replace("\\","\\\\");
-					
 		model.setDatabaseDirectory(directoryChosenString);
 		directoryChosen = true;
 		model.setDirectoryChosen(directoryChosen);
 		//set the database label to the directory.
-		
 		databaseLocation.setText(directoryChosenString);
         
         
@@ -138,13 +133,14 @@ public class View extends JFrame {
         
         
         
-        
+        //default close window operation (close jvm)
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setName("myFrame"); // NOI18N
 
         myLabel.setText("No Image File Loaded");
 
+        //load image file listener
         loadData.setText("Load Image File");
         loadData.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -153,16 +149,15 @@ public class View extends JFrame {
         });
 
      
-        
-        detectCorrosionHeavyButton.setText("Heavy Rust: CONTRAST (Toggle) ");
-        
+        //heavy rust detection button listener
+        detectCorrosionHeavyButton.setText("Heavy Rust: CONTRAST (Toggle)");
         detectCorrosionHeavyButton.addMouseListener(new java.awt.event.MouseAdapter()
         {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                GreyScaleMouseClicked(evt);
+                heavyRustMouseClicked(evt);
             }
         });
-
+        //surface rust detection button listener
         detectCorrosionColourButton.setText("Surface Rust: CONTRAST (Toggle)");
         detectCorrosionColourButton.addMouseListener(new java.awt.event.MouseAdapter()
         {
@@ -172,7 +167,7 @@ public class View extends JFrame {
         });
       
 
-        
+        //select a database button listener
         JButton btnSelectDatabaseFolder = new JButton("Select Database Folder");
         btnSelectDatabaseFolder.setBackground(SystemColor.activeCaption);
         btnSelectDatabaseFolder.addMouseListener(new java.awt.event.MouseAdapter()
@@ -183,11 +178,9 @@ public class View extends JFrame {
         });
         
         JLabel lblTotalRustPercentage = new JLabel("Surface Rust:");
-        
         lblHardScaleRust = new JLabel("Hard Scale Rust:");
-        
         statusLabel = new JLabel();
-        
+        //noramalize image button listener
         JButton revertButton = new JButton();
         revertButton.setText("Normalize Image");
         revertButton.setBackground(SystemColor.activeCaption);
@@ -223,7 +216,8 @@ public class View extends JFrame {
         
         
         
-        
+        //Layout stuff...I used and included the package to update the java design via the gui.
+        //If using eclipse do the following: right vlick on the View.java -> Open with -> WindowBuild Editor
         
         
         
@@ -232,19 +226,19 @@ public class View extends JFrame {
         	layout.createParallelGroup(Alignment.LEADING)
         		.addGroup(layout.createSequentialGroup()
         			.addContainerGap()
-        			.addGroup(layout.createParallelGroup(Alignment.LEADING)
-        				.addGroup(Alignment.TRAILING, layout.createSequentialGroup()
+        			.addGroup(layout.createParallelGroup(Alignment.TRAILING)
+        				.addGroup(layout.createSequentialGroup()
         					.addComponent(lblDatabaseLocation)
-        					.addPreferredGap(ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
+        					.addPreferredGap(ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
         					.addComponent(databaseLocation, GroupLayout.PREFERRED_SIZE, 362, GroupLayout.PREFERRED_SIZE)
         					.addGap(34)
         					.addComponent(btnSelectDatabaseFolder)
         					.addGap(131))
         				.addGroup(layout.createSequentialGroup()
-        					.addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 764, Short.MAX_VALUE)
+        					.addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 834, Short.MAX_VALUE)
         					.addContainerGap())
         				.addGroup(layout.createSequentialGroup()
-        					.addComponent(myLabel, GroupLayout.DEFAULT_SIZE, 774, Short.MAX_VALUE)
+        					.addComponent(myLabel, GroupLayout.DEFAULT_SIZE, 844, Short.MAX_VALUE)
         					.addGap(0))
         				.addGroup(layout.createSequentialGroup()
         					.addGap(35)
@@ -274,7 +268,7 @@ public class View extends JFrame {
         								.addPreferredGap(ComponentPlacement.UNRELATED)
         								.addComponent(detectCorrosionColourButton)))
         						.addComponent(lblShipName))
-        					.addPreferredGap(ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+        					.addGap(71)
         					.addGroup(layout.createParallelGroup(Alignment.TRAILING)
         						.addGroup(layout.createParallelGroup(Alignment.LEADING)
         							.addGroup(layout.createSequentialGroup()
@@ -284,7 +278,7 @@ public class View extends JFrame {
         								.addComponent(revertButton, GroupLayout.PREFERRED_SIZE, 131, GroupLayout.PREFERRED_SIZE))
         							.addComponent(statusLabel, GroupLayout.PREFERRED_SIZE, 110, GroupLayout.PREFERRED_SIZE))
         						.addComponent(saveButton, GroupLayout.PREFERRED_SIZE, 143, GroupLayout.PREFERRED_SIZE))
-        					.addContainerGap())))
+        					.addContainerGap(47, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
         	layout.createParallelGroup(Alignment.LEADING)
@@ -297,7 +291,7 @@ public class View extends JFrame {
         				.addComponent(btnSelectDatabaseFolder, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
         				.addComponent(lblDatabaseLocation))
         			.addPreferredGap(ComponentPlacement.UNRELATED)
-        			.addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
+        			.addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
         			.addPreferredGap(ComponentPlacement.UNRELATED)
         			.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
         				.addComponent(loadData, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -306,17 +300,17 @@ public class View extends JFrame {
         					.addComponent(revertButton)
         					.addComponent(detectCorrosionHeavyButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         			.addPreferredGap(ComponentPlacement.UNRELATED)
-        			.addGroup(layout.createParallelGroup(Alignment.LEADING)
+        			.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
         				.addGroup(layout.createSequentialGroup()
-        					.addGroup(layout.createParallelGroup(Alignment.LEADING)
+        					.addGroup(layout.createParallelGroup(Alignment.LEADING, false)
         						.addGroup(layout.createSequentialGroup()
         							.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
         								.addComponent(percentageRustLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         								.addComponent(lblTotalRustPercentage, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         							.addPreferredGap(ComponentPlacement.RELATED)
-        							.addGroup(layout.createParallelGroup(Alignment.TRAILING)
+        							.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
         								.addComponent(lblHardScaleRust)
-        								.addComponent(deepRustPercentageLabel, GroupLayout.DEFAULT_SIZE, 14, Short.MAX_VALUE)))
+        								.addComponent(deepRustPercentageLabel, GroupLayout.PREFERRED_SIZE, 17, GroupLayout.PREFERRED_SIZE)))
         						.addGroup(layout.createParallelGroup(Alignment.BASELINE)
         							.addComponent(lblStatus)
         							.addComponent(statusLabel)))
@@ -333,14 +327,15 @@ public class View extends JFrame {
         );
         getContentPane().setLayout(layout);
         
+        
      //   Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
       
-        this.setSize(800, 644);
-    }// </editor-fold>         
+        this.setSize(830, 644);
+    }      
 	
 	
 	
-	
+	//Load the database Directory
 	private void loadDirectoryMouseClicked(java.awt.event.MouseEvent evt)
 	{
 		  try {
@@ -359,22 +354,27 @@ public class View extends JFrame {
     			model.setDirectoryChosen(directoryChosen);
     			//set the database label to the directory.
     			
-    			databaseLocation.setText(directoryChosenString);}
+    			databaseLocation.setText(directoryChosenString);
+    		    detectedThisSession = false;	
+    		    highlightCurrentToggle(5);
+    		}
     		    
 		  } catch (Exception er) {
 	            System.out.println("Some has gone wrong with the loadDataMouseClick");
 		  }
 	}
 
+	
+	//Loads the image file and displays to the screen. 
     private void loadDataMouseClicked(java.awt.event.MouseEvent evt) {                                      
-        // TODO add your handling code here:
         try {
         	
-        	
+        	//vars
             String data = controller.getMessage();
             myLabel.setText(data);
             myLabel.setVisible(true);
             boolean flag = true;
+            //Flag that checks to see if this image has been loaded for the first time.
             if (flag == true)
             	{
             		final JFileChooser fc = new JFileChooser();
@@ -384,39 +384,24 @@ public class View extends JFrame {
 
             		int response = fc.showOpenDialog(this);
             		if (response == JFileChooser.APPROVE_OPTION){
-            		
             			File newFile = fc.getSelectedFile();
             			//open the file here and update the picture!
             			myLabel.setText(newFile.getName());
-            			System.out.println(newFile.toString());
+            
             			myImage= ImageIO.read(new File(newFile.toString()));
             			setCurrentFilePath(newFile.toString());
-            			
-            			//myPic.setImage(myImage);
-            			//SCALE THE PIC BUT IT SHOULD NOT GO BIGGER THAN THE HEIGHT/WIDTH.
             			picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
-            			//reduce size of image
             			myPic.setImage(myImage.getScaledInstance(picLabel.getWidth(), picLabel.getHeight(), Image.SCALE_SMOOTH));
-            			
-            			
-            		//	picLabel.setVisible(false);
             			picLabel.setIcon(myPic);
-            			
             			picLabel.setVisible(true);
             			state = "contour";
             			percentageRustLabel.setVisible(false);
             			deepRustPercentageLabel.setVisible(false);
             			statusLabel.setVisible(false);
-            		  //  this.pack();
-            	
-            			//IF STATEMENT: IF WINDOW IS TOO SMALL, MAKE IT BIGGER
-            			//IF PICLABEL IS BIGGER THAN JSCROLLPANE1 MAKE THIS.SETSIZE BIGGER
-            			//jScrollPane1.setSize(myImage.getWidth(), myImage.getHeight());
-            		//	this.setSize(myImage.getWidth(), myImage.getHeight());
-            			
-            		//	this.pack();
+            			detectedThisSession = false;
+                		isDefault = false;
             		}
-            		detectedThisSession = false;
+            		//green highlight of button
             		highlightCurrentToggle(5);
             	}
         } catch (Exception er) {
@@ -425,16 +410,17 @@ public class View extends JFrame {
         
     }                                     
 
-    private void GreyScaleMouseClicked(java.awt.event.MouseEvent evt) {                                       
-// TODO add your handling code here:
-    	
-    	
+    private void heavyRustMouseClicked(java.awt.event.MouseEvent evt) {  
+    	// Tech Debt: Merge these two very similar methods into one.
+    	//Checks to see if this is the default image (Starting screen image - If it is then don't allow toggles to work).
+    	if (isDefault == false)
+    	{
+    		//Toggle is either in one state or another. Contour (Circles around rust) or Contrast (Black background against white rust).
         if (state == "contour"){
         	highlightCurrentToggle(3);
-        //TODO
-        //IF FILE HAS BEEN DRAWN, THEN JUST READ!
         	try{
         		highlightCurrentToggle(3);
+        		//If the rust detection has been done, don't bother wasting precious cpu and memory. Just select the file and redisplay.
         		if (detectedThisSession == true)
         		{
         			Image contouredImage = ImageIO.read(new File(directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_contouredHardRust.jpg"));
@@ -447,62 +433,38 @@ public class View extends JFrame {
         		}
         		else
         		{
-        System.out.println("DO THE CONTOUR THING");
+        //Contour! Go to Model and process image.			
         Image imageToEdit = myPic.getImage();
 		System.out.println("my current file path is: " + getCurrentFilePath());
-		model.detectRed(getCurrentFilePath());
-		//set image to contour colour
-		
-			
-
-			
-		System.out.println("Trying to Read File Path: " + directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_contouredHardRust.jpg");
+		model.detectSurfaceRust(getCurrentFilePath());
+		//set image to contour colour and resize image to fit window.
 		Image contouredImage = ImageIO.read(new File(directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_contouredHardRust.jpg"));
-		//System.out.println(getCurrentFilePath()+"/contouredColour.jpg");
-	//	myPic.setImage(contouredImage);
-		System.out.println("did i make it");
 		picLabel.setVisible(false);
 		picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
 		myPic.setImage(contouredImage.getScaledInstance(picLabel.getWidth(), picLabel.getHeight(), Image.SCALE_SMOOTH));
-		
 		picLabel.setIcon(myPic);
 		picLabel.setVisible(true);
 		setState("contrast");
-		//set the piclabel size
-		
-		//reduce size of image
-		
-		
 		percentageRustLabel.setText(Double.toString(model.getRustPercentage()*100) + "%");
-	
 		percentageRustLabel.setVisible(true);
 		System.out.println(model.getDeepRustPercentage());
 		deepRustPercentageLabel.setText(Double.toString(model.getDeepRustPercentage()*100) + "%");
 		deepRustPercentageLabel.setVisible(true);
-		
 		statusLabel.setText(model.getRustStatus());
 		statusLabel.setVisible(true);
-	//	lblStatus.setVisible(false);
-	//	lblStatus.setText(model.getRustStatus());
-	//	lblStatus.setVisible(true);
-	
-	   // pack();
 		detectedThisSession = true;
         		}
 		}catch(Exception e)
-		{
-			//caught
-		
+		{	
+			//catch any errors in detection
 			System .out.println("CAUGHT tried to CONTOUR from : " + e.toString());
-			System.out.println(model.sendCutString(currentFilePath)+"/contouredColour.jpg");
-			
+
+	
 		}
         }
-		
-        //CONTRAST
         else 
 		{
-			//do this
+			//do the contrast. (exactly the same but contrasts).
         	try{
         		highlightCurrentToggle(4);
         		if (detectedThisSession == true)
@@ -517,41 +479,32 @@ public class View extends JFrame {
         		}
         		else
         		{
-			System.out.println("DO THE CONTRAST THING");
 			Image imageToEdit = myPic.getImage();
-			System.out.println(getCurrentFilePath());
-			model.detectRed(getCurrentFilePath());
-			//set image to contour colour
-		
-				
+
+			model.detectSurfaceRust(getCurrentFilePath());
+			//set image to contrast colour and resize image to fit window.
 			Image contouredImage = ImageIO.read(new File(directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_detectedHardRustColour.jpg"));
-			//System.out.println(getCurrentFilePath()+"/contouredColour.jpg");
-	//		myPic.setImage(contouredImage);
 			picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
 			myPic.setImage(contouredImage.getScaledInstance(picLabel.getWidth(), picLabel.getHeight(), Image.SCALE_SMOOTH));
 			picLabel.setVisible(false);
 			picLabel.setIcon(myPic);
 			picLabel.setVisible(true);
 			setState("contour");
-			 
         		}
 			}catch(Exception e)
 			{
-				//caught
-			
+			//catch any errors in detection
 				System .out.println("CAUGHT tried to CONTRAST exception: " + e.toString());
-				System.out.println(model.sendCutString(currentFilePath)+"/detectedColour.jpg");
-				
+	
 			}
 	        }
-    //    pack();
-      
-     
+    	}
     }       
     
     private void ColourMouseClicked(java.awt.event.MouseEvent evt) {                                       
-        // TODO Tech Debt, merge two similar methods into one.
-    	
+        // Tech Debt: Merge these two very similar methods into one.
+    	if (isDefault == false)
+    	{
         if (state == "contour"){
         //TODO
         //IF FILE HAS BEEN DRAWN, THEN JUST READ!
@@ -569,53 +522,32 @@ public class View extends JFrame {
         		}
         		else
         		{
-        System.out.println("DO THE CONTOUR THING");
+        //Contour! Go to Model and process image.		
         Image imageToEdit = myPic.getImage();
 		System.out.println("my current file path is: " + getCurrentFilePath());
-		model.detectRed(getCurrentFilePath());
-		//set image to contour colour
-		
-			
-
-			
-		System.out.println("Trying to Read File Path: " + directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_contouredColour.jpg");
+		model.detectSurfaceRust(getCurrentFilePath());
+		//set image to contour colour and resize image to fit window.
 		Image contouredImage = ImageIO.read(new File(directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_contouredColour.jpg"));
-		//System.out.println(getCurrentFilePath()+"/contouredColour.jpg");
-	//	myPic.setImage(contouredImage);
 		System.out.println("did i make it");
 		picLabel.setVisible(false);
 		picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
 		myPic.setImage(contouredImage.getScaledInstance(picLabel.getWidth(), picLabel.getHeight(), Image.SCALE_SMOOTH));
-		
 		picLabel.setIcon(myPic);
 		picLabel.setVisible(true);
 		setState("contrast");
-		//set the piclabel size
-		
-		//reduce size of image
-		
 		
 		percentageRustLabel.setText(Double.toString(model.getRustPercentage()*100) + "%");
-	
 		percentageRustLabel.setVisible(true);
-		System.out.println(model.getDeepRustPercentage());
-		
 		deepRustPercentageLabel.setText(Double.toString(model.getDeepRustPercentage()*100) + "%");
 		deepRustPercentageLabel.setVisible(true);
 		
 		statusLabel.setText(model.getRustStatus());
 		statusLabel.setVisible(true);
-	//	lblStatus.setVisible(false);
-	//	lblStatus.setText(model.getRustStatus());
-	//	lblStatus.setVisible(true);
-	
-	   // pack();
 		detectedThisSession = true;
         		}
 		}catch(Exception e)
 		{
-			//caught
-		
+	
 			System .out.println("CAUGHT tried to CONTOUR from : " + e.toString());
 			System.out.println(model.sendCutString(currentFilePath)+"/contouredColour.jpg");
 			
@@ -625,7 +557,7 @@ public class View extends JFrame {
         //CONTRAST
         else 
 		{
-			//do this
+			//Same as the Contour but contrasts!
         	try{
         		highlightCurrentToggle(2);
         		if (detectedThisSession == true)
@@ -640,35 +572,29 @@ public class View extends JFrame {
         		}
         		else
         		{
+        	//contrast! Go to Model and process image.	
 			System.out.println("DO THE CONTRAST THING");
 			Image imageToEdit = myPic.getImage();
 			System.out.println(getCurrentFilePath());
-			model.detectRed(getCurrentFilePath());
-			//set image to contour colour
-		
-				
+			model.detectSurfaceRust(getCurrentFilePath());
+			//set image to contour colour and resize image to fit window.
 			Image contouredImage = ImageIO.read(new File(directoryChosenString + "\\" + model.sendCutString(currentFilePath) +"_detectedColour.jpg"));
-			//System.out.println(getCurrentFilePath()+"/contouredColour.jpg");
-	//		myPic.setImage(contouredImage);
 			picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
 			myPic.setImage(contouredImage.getScaledInstance(picLabel.getWidth(), picLabel.getHeight(), Image.SCALE_SMOOTH));
 			picLabel.setVisible(false);
 			picLabel.setIcon(myPic);
 			picLabel.setVisible(true);
 			setState("contour");
-			 
         		}
 			}catch(Exception e)
 			{
-				//caught
-			
+				//Catch any errors in image processing process
 				System .out.println("CAUGHT tried to CONTRAST exception: " + e.toString());
 				System.out.println(model.sendCutString(currentFilePath)+"/detectedColour.jpg");
 				
 			}
-	        }
-    //    pack();
-    } 
+	      }
+    } }
     
     
     private void highlightCurrentToggle(int code)
@@ -691,20 +617,20 @@ public class View extends JFrame {
     	//if 3, change to contrast heavy (currently contour)
     	if (code == 3)
     	{
-    		detectCorrosionHeavyButton.setText("Heavy Rust: CONTOUR (Toggle)  ");
+    		detectCorrosionHeavyButton.setText("Heavy Rust: CONTOUR   (Toggle)");
     		detectCorrosionHeavyButton.setBackground(Color.decode("#90ee90"));
     		detectCorrosionColourButton.setBackground(SystemColor.activeCaption);
     	}
     	//if 4, change to contour heavy (currently contrast)
     	if (code == 4)
     	{
-    		detectCorrosionHeavyButton.setText("Heavy Rust: CONTRAST (Toggle)   ");
+    		detectCorrosionHeavyButton.setText("Heavy Rust: CONTRAST (Toggle)");
     		detectCorrosionHeavyButton.setBackground(Color.decode("#90ee90"));
     		detectCorrosionColourButton.setBackground(SystemColor.activeCaption);
     	}
     	if (code == 5)
     	{
-    		detectCorrosionHeavyButton.setText("Heavy Rust: CONTOUR (Toggle)  ");
+    		detectCorrosionHeavyButton.setText("Heavy Rust: CONTOUR   (Toggle)");
         	detectCorrosionColourButton.setText("Surface Rust: CONTOUR (Toggle)");
         	detectCorrosionColourButton.setBackground(SystemColor.activeCaption);
         	detectCorrosionHeavyButton.setBackground(SystemColor.activeCaption);
@@ -716,8 +642,11 @@ public class View extends JFrame {
     	}
    
     }
+    //Reverts all of the toggle buttons back to their default state and resizes the image to fit the window.
     private void revert(java.awt.event.MouseEvent s)
     {
+    	if (isDefault == false)
+    	{
     	if (detectedThisSession == true)
     	{
     	detectCorrosionHeavyButton.setText("Heavy Rust: CONTOUR (Toggle)  ");
@@ -725,6 +654,7 @@ public class View extends JFrame {
     	detectCorrosionColourButton.setBackground(SystemColor.activeCaption);
     	detectCorrosionHeavyButton.setBackground(SystemColor.activeCaption);
     	try {
+    		//resize or 'normalizes' the image in relation to the window
 			Image contouredImage = ImageIO.read(new File(currentFilePath));
 			picLabel.setVisible(false);
 			picLabel.setSize(jScrollPane1.getWidth()-10, jScrollPane1.getHeight()-10);
@@ -733,19 +663,20 @@ public class View extends JFrame {
 			picLabel.setVisible(true);
 			setState("contour");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
     	}
-    }
+    }}
     
+    //Saves the ship name, part and amount of rusts to a report in the save directory.
     void saveDescription(java.awt.event.MouseEvent s)
     {
+    	//FORCE ALL PARAMETERS TO BE FILLED IN.
     		if (shipNameField.getText().isEmpty() == true  || shipPartField.getText().isEmpty() == true || percentageRustLabel.isVisible() == false || deepRustPercentageLabel.isVisible() == false || statusLabel.getText().isEmpty())
 
     		{
     			JOptionPane.showMessageDialog(this, "Please fill in the Ship Name, Ship Part and toggle on image detection  to save the file.");
-    		
     		}
     		else
     		{
@@ -757,11 +688,10 @@ public class View extends JFrame {
 					writer.println("Ship Part : " + shipPartField.getText());
 					writer.println("Surface Rust : " + percentageRustLabel.getText());
 					writer.println("Heavy Rust : " +  deepRustPercentageLabel.getText());
-					writer.println("Heavy Rust : " +  statusLabel.getText());
+					writer.println("Status : " +  statusLabel.getText());
 	    			writer.close();
 	    			highlightCurrentToggle(9);
 				} catch (FileNotFoundException | UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
     			
@@ -778,6 +708,8 @@ public class View extends JFrame {
     	this.currentFilePath=s;
     }
 
+    
+    //Ignore: Log generator for the GUI.
     /**
      * @param args the command line arguments
      */
@@ -830,7 +762,7 @@ public class View extends JFrame {
     private javax.swing.JButton detectCorrosionColourButton;
     private JLabel picLabel;
     private ImageIcon myPic;
-    private BufferedImage myImage;
+    private Image myImage;
     private JLabel lblHardScaleRust;
     private JLabel statusLabel;
     private JLabel lblShipPart;

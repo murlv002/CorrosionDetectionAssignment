@@ -99,67 +99,13 @@ public class Model {
 	        return data;
 	    }
 	    
-	   
-	    public void ChangeToGreyScale(String imagePathToEdit)
-	    {
-	    	
-	    	/*
-	     //OPENCV STUFF
-	     System.out.println("hello");
-	     
-	     
-	     //RED DETECTION
-	//     detectRed("colour-pic-swatch_2883168b.jpg");
-	     
-	     
-	     //GREY SCALE WORKS!!
-	     
-	 
-	     
-	    
-         try {
-        	
-
-       	     System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        	 File input = new File(imagePathToEdit);
-    	    System.out.println("Image path to edit " + imagePathToEdit);
-        	 System.out.println("1");
-			 BufferedImage image = ImageIO.read(new File(imagePathToEdit));
-				System.out.println("2");
-			 byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-			
-	         Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
-	         mat.put(0, 0, data);
-	     
-	         Mat mat1 = new Mat(image.getHeight(),image.getWidth(),CvType.CV_8UC1);
-	         Imgproc.cvtColor(mat, mat1, Imgproc.COLOR_RGB2GRAY);
-	     	System.out.println("3");
-	         byte[] data1 = new byte[mat1.rows() * mat1.cols() * (int)(mat1.elemSize())];
-	         mat1.get(0, 0, data1);
-	         BufferedImage image1 = new BufferedImage(mat1.cols(),mat1.rows(), BufferedImage.TYPE_BYTE_GRAY);
-	         image1.getRaster().setDataElements(0, 0, mat1.cols(), mat1.rows(), data1);
-	     	System.out.println("4");
-	         File output = new File((imagePathToEdit + " grayscale.jpg"));
-	         System.out.println("output  " +   output);
-	         ImageIO.write(image1, "jpg", output);
-	     	System.out.println("5");
-	     
-	         
-		} catch (Exception e) {
-			System.out.println("ERROR WITH CORROSION DETECT");
-		}	
-       */
-	}
-	    
-	    
+	   //just a normal substring definition.  (removes prefix of image file up to / or \)
 	    public void cutString(String imagePathToEdit)
 	    {
 	    	str=imagePathToEdit;
 	    	  
 	    	  if(str.lastIndexOf('\\') > str.lastIndexOf('/'))
 	    	  {
-	    		  
-	    	  
 	    	    int index=str.lastIndexOf('\\');
 	    	    int dotIndex = str.lastIndexOf('.');
 	    	    System.out.println(str.substring(index+1, dotIndex));
@@ -173,6 +119,7 @@ public class Model {
 		    	    savePrefix = (str.substring(index+1, dotIndex));
 	    	  }
 	    }
+	    //just a normal substring definition that returns a substring (removes prefix of image file up to / or \)
 	    public String sendCutString(String imagePathToEdit)
 	    {
 	    	str=imagePathToEdit;
@@ -190,42 +137,38 @@ public class Model {
 	    	  {
 	    		    int index=str.lastIndexOf('/');
 		    	    int dotIndex = str.lastIndexOf('.');
-		    	    System.out.println("index forward-lash was last" + str.substring(index+1, dotIndex));
 		    	    savePrefix = (str.substring(index+1, dotIndex));
 	    	  }
 	    	  return savePrefix;
 	    }
-	    
-	    public void detectRed(String imagePathToEdit)
+	    //Logic for detecting surface rust, it takes an image path as a param
+	    public void detectSurfaceRust(String imagePathToEdit)
 	    {
-	    	cutString(imagePathToEdit);
 	    	//gets substring for naming of files
-	    	 
-	    		  
+	    	cutString(imagePathToEdit);		  
 	    	  //check to see if directory exists:
-	    	  File PictureDirectory = new File(savePrefix);
-	    	  if (!PictureDirectory.exists()) {
-	    		  boolean directoryExists = false;
-	    		
-	    		  try{
-	    			  PictureDirectory.mkdir();
-	    			  directoryExists = true;
-	    		  }
-	    		  catch(SecurityException se){
-	    		        //handle it
-	    		    }        
-	    	  }
-	        //range other
-
-		     //orig   
+	    //	  File PictureDirectory = new File(savePrefix);
+	    //	  if (!PictureDirectory.exists()) {
+	    //		  boolean directoryExists = false;
+	    		//if it doesn't then make it!
+	   // 		  try{
+	   // 			  PictureDirectory.mkdir();
+	   // 			  directoryExists = true;
+	   // 		  }
+	   // 		  catch(SecurityException se){
+	    		        //handle 
+	    //			  System.out.println("I fail here");
+	    //		    }        
+	   // 	  }
+	   
+		     // ---------------------------------------------------------
+	    	 //  SURFACE RUST DETECTION
+	    	 //  SETS THE RGB COLOUR RANGE (NOTE IT IS BLUE-GREEN-RED ORDER)
+	    	 //  NOTE THAT IT HAS A MIN AND MAX.
+	    	 // ---------------------------------------------------------
 		        CvScalar min = opencv_core.cvScalar(31, 72, 94, 255);//BGR-A
 		        CvScalar max= opencv_core.cvScalar(110, 149, 226, 255);//BGR-A
-		        
-	     //   CvScalar min = opencv_core.cvScalar(50, 70, 94, 255);//BGR-A
-	      //  CvScalar max= opencv_core.cvScalar(110, 145, 226, 255);//BGR-A
-	        
-	        System.out.println(imagePathToEdit);
-
+		      
 	            //read image
 	            IplImage orgImg = cvLoadImage(imagePathToEdit);
 	            IplImage deepImg = orgImg;
@@ -240,11 +183,11 @@ public class Model {
 	            //smooth filter- median
 	            cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 13, 0, 0, 0);
 	            
-	            //SAVE BLACK AND WHITE SURFACE RUST _detectedColour.jpg
+	            //SAVE BLACK AND WHITE (CONTRAST) SURFACE RUST _detectedColour.jpg
 	          
 	            cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_detectedColour.jpg", imgThreshold);
 	         
-	            
+
 	            //test contours
 	         
 	            CvMemStorage storage=CvMemStorage.create();
@@ -259,50 +202,31 @@ public class Model {
 	 	      
 	 	            }
 	            }
-	     
-	        
-	            
-	    
 	            setPercentageOfRust(imgThreshold, "allRust");
 	            //save the contour image
 	            System.out.println("Rust percentage is    " + rustPercentage +"%");
 	            cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_contouredColour.jpg", orgImg);
-	            //cvSaveImage("C:\\Users\\Liam\\Documents\\Software Engineering\\Ge.jpg", orgImg);
-	           // System.out.println("database location is: " + dataBaseLocation);
-	           // System.out.println("C:/Users/Liam/Documents/Software Engineering.jps");
-	            //cvSaveImage(savePrefix+ "/contouredColour.jpg", orgImg);
-	          //SAVE CONTOUR SURFACE RUST _contouredColour.jpg
 	            System.out.println("saving at " +databaseDirectory+ "\\"+savePrefix+ "_contouredColour.jpg" );
 	          
 	            
 	            
-	            //get new image
+	            // SETS UP three images to check for additional ranges - Important of you find a subset of colours that are not rust inside of rust range. eg. 1-10 = rust but 3-4 are not rust. ergo. 1-2 + 5-10 = rust.
+	            // ADD More and merge later to add additional ranges.
 	            IplImage imgDeepThreshold = cvCreateImage(cvGetSize(orgImg), orgImg.depth(), 1);
 	            IplImage imgDeepThreshold2 = cvCreateImage(cvGetSize(orgImg), orgImg.depth(), 1);
 	            IplImage imgDeepThreshold3 = cvCreateImage(cvGetSize(orgImg), orgImg.depth(), 1);
-	            //orig 
-	            //Set new min max to reflect heavy rust
-	         //   min = opencv_core.cvScalar(50, 70, 105, 255);//BGR-A
-		    //    max= opencv_core.cvScalar(102, 119, 151, 255);//BGR-A
-		       //altered
-	           // min = opencv_core.cvScalar(45, 43, 82, 255);//BGR-A
-		      //  max= opencv_core.cvScalar(102, 119, 151, 255);//BGR-A
-	            
-	            
-	            //overall min
-		        //min = opencv_core.cvScalar(15, 37, 41, 255);//BGR-A
-		        //max= opencv_core.cvScalar(41, 70, 41, 255);//BGR-A
+	  
+			     // ---------------------------------------------------------
+		    	 //  HEAVY  RUST DETECTION
+		    	 //  SETS THE RGB COLOUR RANGE (NOTE IT IS BLUE-GREEN-RED ORDER)
+		    	 //  NOTE THAT IT HAS A MIN AND MAX.
+		    	 // ---------------------------------------------------------
 		        
-		        //overall max
-		        //CvScalar min2 = opencv_core.cvScalar(71, 92, 73, 255);//BGR-A
-		        //CvScalar max2 = opencv_core.cvScalar(102, 119, 151, 255);//BGR-A
-		        
-		        
-		        //overall min
+		        // Range 1:
 		        min = opencv_core.cvScalar(48, 58, 90, 255);//BGR-A
 		        max= opencv_core.cvScalar(70, 80, 165, 255);//BGR-A
 		        
-		        //overall max
+		        // Range 2
 		        CvScalar min2 = opencv_core.cvScalar(80, 90, 105, 255);//BGR-A
 		        CvScalar max2 = opencv_core.cvScalar(120, 128, 160, 255);//BGR-A
 		  
@@ -324,15 +248,13 @@ public class Model {
 	            if (squares.isNull() != true)
 	            
 	            {
-	            
-	         //   System.out.println(squares.total());
+	           
 	            	 for (int i=0; i<squares2.total(); i++)
 	 	            {
 	 	                cvDrawContours(deepImg, squares2, CvScalar.ONE, CvScalar.ONE, 127, 2, 1);
 
 	 	            }
 	            }
-	            //save the contours
 	            //SAVE CONTOUR HARD RUST _contouredHardRust.jpg
 	            cvSaveImage(databaseDirectory + "\\" + savePrefix+ "_contouredHardRust.jpg", deepImg);
 	            
@@ -370,7 +292,7 @@ public class Model {
 		    		System.out.println("POOR");
 		    		rustStatus="Poor";
 		    	}
-		             //if clause due to overlap of rust colours
+		             //if case due to overlap of rust colours - can be perfected if we perfect rust detection using  artificial intelligence eg. Baysian classifier.
 		    	else if (((rustPercentage >= 0 && rustPercentage < 0.2) && checkedFlag != true ))
 		    	{
 		    		checkedFlag = true;
@@ -387,6 +309,7 @@ public class Model {
 		    	
 		    		else
 		    	{
+		    			//This condition should never occur, May occur if decimal is to 10 or more places? 
 		    		checkedFlag = true;
 		    		System.out.println("no idea");
 		    		rustStatus="Visual Inspection Required";
@@ -394,13 +317,25 @@ public class Model {
 		        
 		        
 		    	}
+		   
+		    //This rounds the percent to 4 decimal places which then gets reduced later to two. 
+		    //Important as it removes long doubles.
 		    rustPercentage = round(rustPercentage, 4);
 		    deepRustPercentage = round(deepRustPercentage, 4);
+		    if (Double.toString(rustPercentage).contains("E") == true)
+		    {
+		    	rustPercentage = 0.0001;
+		    }
+		    if (Double.toString(deepRustPercentage).contains("E") == true)
+		    {
+		    	deepRustPercentage = 0.0001;
+		    }
 	    	}
 		    
 		    
 		    
 	    }
+	    //Big decimal roundin method.
 	    public static double round(double value, int places) {
 	        if (places < 0) throw new IllegalArgumentException();
 
@@ -408,7 +343,7 @@ public class Model {
 	        bd = bd.setScale(places, RoundingMode.HALF_UP);
 	        return bd.doubleValue();
 	    }
-
+	    //getters and setters
 		public double getRustPercentage() {
 			return rustPercentage;
 		}
@@ -449,13 +384,7 @@ public class Model {
 		}
 
 	    
-	    
-	    //OPEN CV CLEAN UP
-	  
-	    
-	    
-	    
-	   
+ 
 	    
 	    
 	}
